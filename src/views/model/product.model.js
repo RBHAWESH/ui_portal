@@ -100,7 +100,14 @@ getEmptyProduct: () => {
       "categoryid": 0,
       "brandid": 0,
       "admincomment": "",
-      "asin": ""
+      "asin": "",
+      "typeid": 0,
+      "templateid": 0,
+      "taxcategoryid": 0,
+      "vendorid": 0,
+      "customerroleid": 0,
+      "deliveryid": 0,
+      "storeid": 0,
     };
   }
 }

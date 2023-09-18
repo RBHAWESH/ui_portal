@@ -27,8 +27,8 @@ const Dashboard = () => {
         navigate("/master/product");
     }
 
-    const handleEditClick = () => {
-        navigate("/master/product/1");
+    const handleEditClick = (id) => {
+        navigate("/master/product/" + id);
     }
 
     const [products, setProducts] = useState([]);
@@ -94,7 +94,7 @@ const Dashboard = () => {
                                             <CFormSwitch value={item.published} id="formSwitchCheckCheckedDisabled" defaultChecked disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CButton onClick={handleEditClick} color="info" variant="outline">
+                                            <CButton onClick={() => handleEditClick(item.id)} color="info" variant="outline">
                                                 <CIcon className="text-info" icon={cilPencil} />
                                             </CButton>
                                         </CTableDataCell>

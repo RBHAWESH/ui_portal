@@ -1,39 +1,33 @@
-let baseUrl = "http://localhost:8080/api/";
+import utilutyapi from "./utility.api";
+// let baseUrl = "http://localhost:8080/api/";
 const masterapi = {
-  
-  getPublishedCategories: async () => {
-    try {
-      const rawResponse = await fetch(baseUrl + "categories/published/all", {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json;UTF-8",
-          //   Authorization: Utilities.getAuthoriztion(),
-        },
-      });
 
-      return await (rawResponse.status === 200 ? rawResponse.json() : null);
-    } catch (error) {
-      alert("Error " + error);
-      return null;
-    }
+  getPublishedCategories: async () => {
+    return await utilutyapi.getItems("categories/published/all");    
   },
   getPublishedBrands: async () => {
-    try {
-      const rawResponse = await fetch(baseUrl + "brand/published/all", {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json;UTF-8",
-          //   Authorization: Utilities.getAuthoriztion(),
-        },
-      });
-
-      return await (rawResponse.status === 200 ? rawResponse.json() : null);
-    } catch (error) {
-      alert("Error " + error);
-      return null;
-    }
+    return await utilutyapi.getItems("brand/published/all");
+  },
+  getProductTypes: async () => {
+    return await utilutyapi.getItems("producttype/all");
+  },
+  getProductTemplate: async () => {
+    return await utilutyapi.getItems("producttemplate/all");
+  },
+  getProductTaxCategory: async () => {
+    return await utilutyapi.getItems("producttaxcategory/all");
+  },
+  getVendors: async () => {
+    return await utilutyapi.getItems("vendor/all");
+  },
+  getCustomerRoles: async () => {
+    return await utilutyapi.getItems("customerrole/all");
+  },
+  getDeliveryDates: async () => {
+    return await utilutyapi.getItems("deliverydate/all");
+  },
+  getStores: async () => {
+    return await utilutyapi.getItems("stores/all");
   },
 };
 

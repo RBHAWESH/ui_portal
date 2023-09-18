@@ -32,6 +32,15 @@ const CustomStyles = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [endtDate, setEndDate] = useState(new Date());
     const [brands, setBrands] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [producttypes, setProducttypes] = useState([]);
+    const [producttemplates, setProducttemplates] = useState([]);
+    const [producttaxcategories, setProducttaxcategories] = useState([]);
+    const [vendors, setVendors] = useState([]);
+    const [customerroles, setCustomerroles] = useState([]);
+    const [deliverydates, setDeliverydates] = useState([]);
+    const [stores, setStores] = useState([]);
+
     const params = useParams();
 
     const handleUpdate = (e, key) => {
@@ -56,10 +65,23 @@ const CustomStyles = () => {
             event.stopPropagation()
         }
         setValidated(true)
+
+        productApi.saveProduct(product).then(result => {
+            if (result && result.data)
+                alert(result.data );
+        });
     }
 
     useEffect(() => {
         getBrands();
+        getCategories();
+        getProductTemplate();
+        getProductTypes();
+        getProductTaxCategory();
+        getCustomerRoles();
+        getDeliveryDates();
+        getVendors();
+        getStores();
         if (params.id !== undefined && params.id !== null && params.id !== 0)
             productApi.getProductById(params.id).then(result => {
                 if (result.data)
@@ -74,6 +96,62 @@ const CustomStyles = () => {
         });
     }
 
+    const getCategories = () => {
+        masterapi.getPublishedCategories().then(result => {
+            if (result.data)
+                setCategories(result.data);
+        });
+    }
+
+    const getProductTypes = () => {
+        masterapi.getProductTypes().then(result => {
+            if (result.data)
+                setProducttypes(result.data);
+        });
+    }
+
+    const getProductTaxCategory = () => {
+        masterapi.getProductTaxCategory().then(result => {
+            if (result.data)
+                setProducttaxcategories(result.data);
+        });
+    }
+
+    const getProductTemplate = () => {
+        masterapi.getProductTemplate().then(result => {
+            if (result.data)
+                setProducttemplates(result.data);
+        });
+    }
+
+    const getDeliveryDates = () => {
+        masterapi.getDeliveryDates().then(result => {
+            if (result.data)
+                setDeliverydates(result.data);
+        });
+    }
+
+    const getCustomerRoles = () => {
+        masterapi.getCustomerRoles().then(result => {
+            if (result.data)
+                setCustomerroles(result.data);
+        });
+    }
+
+    const getVendors = () => {
+        masterapi.getVendors().then(result => {
+            if (result.data)
+                setVendors(result.data);
+        });
+    }
+
+    const getStores = () => {
+        masterapi.getStores().then(result => {
+            if (result.data)
+                setStores(result.data);
+        });
+    }
+
     return (
 
         <CForm
@@ -82,6 +160,26 @@ const CustomStyles = () => {
             validated={validated}
             onSubmit={handleSubmit}
         >
+            <CRow>
+                <CCol xs={12}>
+                    <CCard>
+                        <CCardBody>
+                            <CRow>
+                                <CCol xs={12}>
+                                    <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <CButton className='text-right' type="submit" shape="rounded-0" color="info" variant="outline">
+                                            Submit form
+                                        </CButton>
+                                        <CButton className='text-right' shape="rounded-0" color="info" variant="outline">
+                                            Back
+                                        </CButton>
+                                    </div>
+                                </CCol>
+                            </CRow>
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+            </CRow>
             <CRow>
                 <CCol xs={12}>
                     <CCard className="mb-4">
@@ -99,8 +197,7 @@ const CustomStyles = () => {
                                     <CFormLabel htmlFor="category">Select Category</CFormLabel>
                                     <CFormSelect value={product.categoryid} onChange={(e) => { handleUpdate(e, 'categoryid'); }} id="category">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>Supplements</option>
-                                        <option value={2}>Sports</option>
+                                        {categories.map((item, index) => <option value={item?.id} >{item?.Name}</option>)}
                                     </CFormSelect>
                                     <CFormFeedback invalid>Please provide a Category.</CFormFeedback>
 
@@ -110,8 +207,6 @@ const CustomStyles = () => {
                                     <CFormSelect value={product.brandid} onChange={(e) => { handleUpdate(e, 'brandid'); }} id="brand">
                                         <option value={0}>Choose...</option>
                                         {brands.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
-                                        {/* <option value={1}>Supplements</option>
-                                        <option value={2}>Sports</option> */}
                                     </CFormSelect>
                                     <CFormFeedback invalid>Please provide a Category.</CFormFeedback>
 
@@ -170,17 +265,16 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="producttype">Product type</CFormLabel>
-                                    <CFormSelect value={product.producttype} onChange={(e) => { handleUpdate(e, 'producttype'); }} id="producttype">
+                                    <CFormSelect value={product.typeid} onChange={(e) => { handleUpdate(e, 'typeid'); }} id="producttype">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>Simple </option>
-                                        <option value={2}>Grouped</option>
+                                        {producttypes.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="producttemplate">Product template</CFormLabel>
-                                    <CFormSelect value={product.producttemplate} onChange={(e) => { handleUpdate(e, 'producttemplate'); }} id="producttemplate">
+                                    <CFormSelect value={product.templateid} onChange={(e) => { handleUpdate(e, 'templateid'); }} id="producttemplate">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>Simple product</option>
+                                        {producttemplates.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
@@ -190,23 +284,23 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="parentgroupedproductid">Customer roles</CFormLabel>
-                                    <CFormSelect value={product.parentgroupedproductid} onChange={(e) => { handleUpdate(e, 'parentgroupedproductid'); }} id="parentgroupedproductid">
+                                    <CFormSelect value={product.customerroleid} onChange={(e) => { handleUpdate(e, 'customerroleid'); }} id="parentgroupedproductid">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>Admin</option>
+                                        {customerroles.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="storeid">Limited to stores</CFormLabel>
                                     <CFormSelect value={product.storeid} onChange={(e) => { handleUpdate(e, 'storeid'); }} id="storeid">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>Wall Herb</option>
+                                        {stores.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="vendor">Vendor</CFormLabel>
-                                    <CFormSelect value={product.vendor} onChange={(e) => { handleUpdate(e, 'vendor'); }} id="vendor">
+                                    <CFormSelect value={product.vendorid} onChange={(e) => { handleUpdate(e, 'vendorid'); }} id="vendor">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>Vendor 1</option>
+                                        {vendors.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
@@ -241,11 +335,6 @@ const CustomStyles = () => {
                                         rows={3}
                                     ></CFormTextarea>
 
-                                </CCol>
-                                <CCol xs={12}>
-                                    <CButton type="submit" shape="rounded-0" color="info" variant="outline">
-                                        Submit form
-                                    </CButton>
                                 </CCol>
                             </CRow>
                         </CCardBody>
@@ -315,9 +404,9 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="taxcategory">Tax category</CFormLabel>
-                                    <CFormSelect checked={product.taxcategory} onChange={(e) => { handleUpdate(e, 'taxcategory'); }} id="taxcategory">
+                                    <CFormSelect value={product.taxcategoryid} onChange={(e) => { handleUpdate(e, 'taxcategoryid'); }} id="taxcategory">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>Discount 1</option>
+                                        {producttaxcategories.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
@@ -378,9 +467,9 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="deliverydate">Delivery Date</CFormLabel>
-                                    <CFormSelect value={product.deliverydate} onChange={(e) => { handleUpdate(e, 'deliverydate'); }} id="deliverydate">
+                                    <CFormSelect value={product.deliveryid} onChange={(e) => { handleUpdate(e, 'deliveryid'); }} id="deliverydate">
                                         <option value={0}>Choose...</option>
-                                        <option value={1}>1 - 2 Days</option>
+                                        {deliverydates.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                             </CRow>
