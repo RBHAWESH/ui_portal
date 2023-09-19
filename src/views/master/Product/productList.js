@@ -91,7 +91,7 @@ const Dashboard = () => {
 
 
                                         <CTableDataCell className="text-center">
-                                            <CFormSwitch value={item.published} id="formSwitchCheckCheckedDisabled" defaultChecked disabled />
+                                            <CFormSwitch checked={item.published} id="formSwitchCheckCheckedDisabled"  disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
                                             <CButton onClick={() => handleEditClick(item.id)} color="info" variant="outline">

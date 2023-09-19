@@ -4,7 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Editor } from 'react-draft-wysiwyg';
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Product } from '../../model/product.model';
-import { convertToRaw } from 'draft-js';
+import { EditorState, ContentState, convertFromHTML, convertToRaw } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
 import productApi from "../../api/product.api";
 import masterapi from "../../api/master.api";
@@ -40,35 +40,37 @@ const CustomStyles = () => {
     const [customerroles, setCustomerroles] = useState([]);
     const [deliverydates, setDeliverydates] = useState([]);
     const [stores, setStores] = useState([]);
-
+    const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+    const [editorStateShort, setEditorStateShort] = useState(() => EditorState.createEmpty());
     const params = useParams();
 
     const handleUpdate = (e, key) => {
-        console.log(e);
+        console.log(e.target.value);
         if (key !== 'markasnewenddatetimeutc' && key !== 'markasnewstartdatetimeutc') {
             product[key] = e.target.value;
         }
         setProduct({ ...product });
     }
 
-    const onEditorStateChange = (editorState) => {
-        product.fulldescription = draftToHtml(convertToRaw(editorState.getCurrentContent()));
-        setProduct({ ...product });
-        console.log(product);
-    };
-
     const handleSubmit = (event) => {
         const form = event.currentTarget;
-        console.log("data", product);
+
         if (form.checkValidity() === false) {
             event.preventDefault()
             event.stopPropagation()
         }
         setValidated(true)
 
+        product.markasnewenddatetimeutc = endtDate;
+        product.markasnewstartdatetimeutc = startDate;
+        product.fulldescription = draftToHtml(convertToRaw(editorState.getCurrentContent()));
+        product.shortdescription = draftToHtml(convertToRaw(editorStateShort.getCurrentContent()));
+        setProduct({ ...product });
+        console.log("data", product);
+
         productApi.saveProduct(product).then(result => {
             if (result && result.data)
-                alert(result.data );
+                alert(result.data);
         });
     }
 
@@ -84,8 +86,19 @@ const CustomStyles = () => {
         getStores();
         if (params.id !== undefined && params.id !== null && params.id !== 0)
             productApi.getProductById(params.id).then(result => {
-                if (result.data)
+                if (result.data) {
+                    if (result.data.markasnewstartdatetimeutc) {
+                        setStartDate(new Date(result.data.markasnewstartdatetimeutc));
+                    }
+                    if (result.data.markasnewenddatetimeutc) {
+                        setEndDate(new Date(result.data.markasnewenddatetimeutc));
+                    }                  
+
                     setProduct({ ...result.data });
+                    setEditorState(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(result.data.fulldescription))));
+                    setEditorStateShort(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(result.data.shortdescription))));
+                    
+                }
             });
     }, [params?.id])
 
@@ -197,7 +210,7 @@ const CustomStyles = () => {
                                     <CFormLabel htmlFor="category">Select Category</CFormLabel>
                                     <CFormSelect value={product.categoryid} onChange={(e) => { handleUpdate(e, 'categoryid'); }} id="category">
                                         <option value={0}>Choose...</option>
-                                        {categories.map((item, index) => <option value={item?.id} >{item?.Name}</option>)}
+                                        {categories.map((item) => <option value={item?.id} >{item?.Name}</option>)}
                                     </CFormSelect>
                                     <CFormFeedback invalid>Please provide a Category.</CFormFeedback>
 
@@ -206,21 +219,23 @@ const CustomStyles = () => {
                                     <CFormLabel htmlFor="brand">Select Brand</CFormLabel>
                                     <CFormSelect value={product.brandid} onChange={(e) => { handleUpdate(e, 'brandid'); }} id="brand">
                                         <option value={0}>Choose...</option>
-                                        {brands.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {brands.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                     <CFormFeedback invalid>Please provide a Category.</CFormFeedback>
 
                                 </CCol>
                                 <CCol md={12}>
                                     <CFormLabel htmlFor="published">Published</CFormLabel>
-                                    <CFormSwitch checked={product.published} value={product.published} onChange={(e) => { handleUpdate(e, 'published'); }} id="published" />
+                                    <CFormSwitch checked={product.published} onChange={(e) => { product.published = !product.published; setProduct({ ...product }); }} id="published" />
                                 </CCol>
                                 <CCol md={12}>
                                     <CFormLabel htmlFor="shortdescription">Short description</CFormLabel>
-                                    <CFormTextarea value={product.shortdescription} onChange={(e) => { handleUpdate(e, 'shortdescription'); }}
+                                    {/* <CFormTextarea value={product.shortdescription} onChange={(e) => { handleUpdate(e, 'shortdescription'); }}
                                         id="shortdescription"
                                         rows={3}
-                                    ></CFormTextarea>
+                                    ></CFormTextarea> */}
+                                     <Editor editorState={editorStateShort}  onEditorStateChange={setEditorStateShort} editorClassName="demo-editor"
+                                    />
 
                                 </CCol>
                                 <CCol md={12}>
@@ -229,7 +244,7 @@ const CustomStyles = () => {
                                         id="exampleFormControlTextarea1"
                                         rows={3}
                                     ></CFormTextarea> */}
-                                    <Editor onEditorStateChange={onEditorStateChange} editorClassName="demo-editor"
+                                    <Editor editorState={editorState}  onEditorStateChange={setEditorState} editorClassName="demo-editor"
                                     />
 
                                 </CCol>
@@ -260,47 +275,47 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="showonhomepage">Show on home page</CFormLabel>
-                                    <CFormSwitch checked={product.showonhomepage} onChange={(e) => { handleUpdate(e, 'showonhomepage'); }} id="showonhomepage" />
+                                    <CFormSwitch checked={product.showonhomepage} onChange={(e) => { product.showonhomepage = !product.showonhomepage; setProduct({ ...product }); }} id="showonhomepage" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="producttype">Product type</CFormLabel>
                                     <CFormSelect value={product.typeid} onChange={(e) => { handleUpdate(e, 'typeid'); }} id="producttype">
                                         <option value={0}>Choose...</option>
-                                        {producttypes.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {producttypes.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="producttemplate">Product template</CFormLabel>
                                     <CFormSelect value={product.templateid} onChange={(e) => { handleUpdate(e, 'templateid'); }} id="producttemplate">
                                         <option value={0}>Choose...</option>
-                                        {producttemplates.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {producttemplates.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="visibleindividually">Visible individually</CFormLabel>
-                                    <CFormSwitch checked={product.visibleindividually} onChange={(e) => { handleUpdate(e, 'visibleindividually'); }} id="visibleindividually" />
+                                    <CFormSwitch checked={product.visibleindividually} onChange={(e) => { product.visibleindividually = !product.visibleindividually; setProduct({ ...product }); }} id="visibleindividually" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="parentgroupedproductid">Customer roles</CFormLabel>
                                     <CFormSelect value={product.customerroleid} onChange={(e) => { handleUpdate(e, 'customerroleid'); }} id="parentgroupedproductid">
                                         <option value={0}>Choose...</option>
-                                        {customerroles.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {customerroles.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="storeid">Limited to stores</CFormLabel>
                                     <CFormSelect value={product.storeid} onChange={(e) => { handleUpdate(e, 'storeid'); }} id="storeid">
                                         <option value={0}>Choose...</option>
-                                        {stores.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {stores.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="vendor">Vendor</CFormLabel>
                                     <CFormSelect value={product.vendorid} onChange={(e) => { handleUpdate(e, 'vendorid'); }} id="vendor">
                                         <option value={0}>Choose...</option>
-                                        {vendors.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {vendors.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
@@ -310,7 +325,7 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="allowcustomerreviews">Allow customer reviews</CFormLabel>
-                                    <CFormSwitch checked={product.allowcustomerreviews} onChange={(e) => { handleUpdate(e, 'allowcustomerreviews'); }} id="allowcustomerreviews" />
+                                    <CFormSwitch checked={product.allowcustomerreviews} onChange={(e) => { product.allowcustomerreviews = !product.allowcustomerreviews; setProduct({ ...product }); }} id="allowcustomerreviews" />
 
                                 </CCol>
                                 <CCol md={4}>
@@ -325,7 +340,7 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="markasnew">Mark as new</CFormLabel>
-                                    <CFormSwitch checked={product.markasnew} onChange={(e) => { handleUpdate(e, 'markasnew'); }} id="markasnew" />
+                                    <CFormSwitch checked={product.markasnew} onChange={(e) => { product.markasnew = !product.markasnew; setProduct({ ...product }); }} id="markasnew" />
 
                                 </CCol>
                                 <CCol md={12}>
@@ -362,32 +377,32 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="disablebuybutton">Disable buy button</CFormLabel>
-                                    <CFormSwitch checked={product.disablebuybutton} onChange={(e) => { handleUpdate(e, 'Name'); }} id="disablebuybutton" />
+                                    <CFormSwitch checked={product.disablebuybutton} onChange={(e) => { product.disablebuybutton = !product.disablebuybutton; setProduct({ ...product }); }} id="disablebuybutton" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="disablewishlistbutton">Disable wishlist button</CFormLabel>
-                                    <CFormSwitch checked={product.disablewishlistbutton} onChange={(e) => { handleUpdate(e, 'disablewishlistbutton'); }} id="disablewishlistbutton" />
+                                    <CFormSwitch checked={product.disablewishlistbutton} onChange={(e) => { product.disablewishlistbutton = !product.disablewishlistbutton; setProduct({ ...product }); }} id="disablewishlistbutton" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="availableforpreorder">Available for pre-order</CFormLabel>
-                                    <CFormSwitch checked={product.availableforpreorder} onChange={(e) => { handleUpdate(e, 'availableforpreorder'); }} id="availableforpreorder" />
+                                    <CFormSwitch checked={product.availableforpreorder} onChange={(e) => { product.availableforpreorder = !product.availableforpreorder; setProduct({ ...product }); }} id="availableforpreorder" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="callforprice">Call for price</CFormLabel>
-                                    <CFormSwitch checked={product.callforprice} onChange={(e) => { handleUpdate(e, 'callforprice'); }} id="callforprice" />
+                                    <CFormSwitch checked={product.callforprice} onChange={(e) => { product.callforprice = !product.callforprice; setProduct({ ...product }); }} id="callforprice" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="customerentersprice">Customer enters price</CFormLabel>
-                                    <CFormSwitch checked={product.customerentersprice} onChange={(e) => { handleUpdate(e, 'customerentersprice'); }} id="customerentersprice" />
+                                    <CFormSwitch checked={product.customerentersprice} onChange={(e) => { product.customerentersprice = !product.customerentersprice; setProduct({ ...product }); }} id="customerentersprice" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="basepriceamount">PAngV (base price) enabled</CFormLabel>
-                                    <CFormSwitch checked={product.basepriceamount} onChange={(e) => { handleUpdate(e, 'basepriceamount'); }} id="basepriceamount" />
+                                    <CFormSwitch checked={product.basepriceamount} onChange={(e) => { product.basepriceamount = !product.basepriceamount; setProduct({ ...product }); }} id="basepriceamount" />
 
                                 </CCol>
                                 <CCol md={4}>
@@ -399,19 +414,19 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="istaxexempt">Tax exempt</CFormLabel>
-                                    <CFormSwitch checked={product.istaxexempt} onChange={(e) => { handleUpdate(e, 'istaxexempt'); }} id="istaxexempt" />
+                                    <CFormSwitch checked={product.istaxexempt} onChange={(e) => { product.istaxexempt = !product.istaxexempt; setProduct({ ...product }); }} id="istaxexempt" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="taxcategory">Tax category</CFormLabel>
                                     <CFormSelect value={product.taxcategoryid} onChange={(e) => { handleUpdate(e, 'taxcategoryid'); }} id="taxcategory">
                                         <option value={0}>Choose...</option>
-                                        {producttaxcategories.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {producttaxcategories.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="istelecommunicationsorbroadcastingorelectronicservices">Telecommunications, broadcasting and electronic services</CFormLabel>
-                                    <CFormSwitch checked={product.istelecommunicationsorbroadcastingorelectronicservices} onChange={(e) => { handleUpdate(e, 'istelecommunicationsorbroadcastingorelectronicservices'); }} id="istelecommunicationsorbroadcastingorelectronicservices" />
+                                    <CFormSwitch checked={product.istelecommunicationsorbroadcastingorelectronicservices} onChange={(e) => { product.istelecommunicationsorbroadcastingorelectronicservices = !product.istelecommunicationsorbroadcastingorelectronicservices; setProduct({ ...product }); }} id="istelecommunicationsorbroadcastingorelectronicservices" />
 
                                 </CCol>
                             </CRow>
@@ -425,7 +440,7 @@ const CustomStyles = () => {
                             <CRow>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="isshipenabled">Shipping enabled</CFormLabel>
-                                    <CFormSwitch checked={product.isshipenabled} onChange={(e) => { handleUpdate(e, 'isshipenabled'); }} id="isshipenabled" />
+                                    <CFormSwitch checked={product.isshipenabled} onChange={(e) => { product.isshipenabled = !product.isshipenabled; setProduct({ ...product }); }} id="isshipenabled" />
 
                                 </CCol>
                                 <CCol md={4}>
@@ -451,12 +466,12 @@ const CustomStyles = () => {
 
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="isfreeshipping">Free shipping</CFormLabel>
-                                    <CFormSwitch checked={product.isfreeshipping} onChange={(e) => { handleUpdate(e, 'isfreeshipping'); }} id="isfreeshipping" />
+                                    <CFormSwitch checked={product.isfreeshipping} onChange={(e) => { product.isfreeshipping = !product.isfreeshipping; setProduct({ ...product }); }} id="isfreeshipping" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="shipseparately">Ship separately</CFormLabel>
-                                    <CFormSwitch checked={product.shipseparately} onChange={(e) => { handleUpdate(e, 'shipseparately'); }} id="shipseparately" />
+                                    <CFormSwitch checked={product.shipseparately} onChange={(e) => { product.shipseparately = !product.shipseparately; setProduct({ ...product }); }} id="shipseparately" />
 
                                 </CCol>
                                 <CCol md={4}>
@@ -469,7 +484,7 @@ const CustomStyles = () => {
                                     <CFormLabel htmlFor="deliverydate">Delivery Date</CFormLabel>
                                     <CFormSelect value={product.deliveryid} onChange={(e) => { handleUpdate(e, 'deliveryid'); }} id="deliverydate">
                                         <option value={0}>Choose...</option>
-                                        {deliverydates.map((item, index) => <option value={item?.id} >{item?.name}</option>)}
+                                        {deliverydates.map((item) => <option value={item?.id} >{item?.name}</option>)}
                                     </CFormSelect>
                                 </CCol>
                             </CRow>
@@ -505,7 +520,7 @@ const CustomStyles = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="notreturnable">Not returnable</CFormLabel>
-                                    <CFormSwitch checked={product.notreturnable} onChange={(e) => { handleUpdate(e, 'notreturnable'); }} id="notreturnable" />
+                                    <CFormSwitch checked={product.notreturnable} onChange={(e) => { product.notreturnable = !product.notreturnable; setProduct({ ...product }); }} id="notreturnable" />
 
                                 </CCol>
                             </CRow>
@@ -551,22 +566,22 @@ const CustomStyles = () => {
                             <CRow>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="recurringtotalcycles">Recurring product</CFormLabel>
-                                    <CFormSwitch checked={product.recurringtotalcycles} onChange={(e) => { handleUpdate(e, 'recurringtotalcycles'); }} id="recurringtotalcycles" />
+                                    <CFormSwitch checked={product.recurringtotalcycles} onChange={(e) => { product.recurringtotalcycles = !product.recurringtotalcycles; setProduct({ ...product }); }} id="recurringtotalcycles" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="isgiftcard">Is gift card</CFormLabel>
-                                    <CFormSwitch checked={product.isgiftcard} onChange={(e) => { handleUpdate(e, 'isgiftcard'); }} id="isgiftcard" />
+                                    <CFormSwitch checked={product.isgiftcard} onChange={(e) => { product.isgiftcard = !product.isgiftcard; setProduct({ ...product }); }} id="isgiftcard" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="isdownload">Downloadable product</CFormLabel>
-                                    <CFormSwitch checked={product.isdownload} onChange={(e) => { handleUpdate(e, 'isdownload'); }} id="isdownload" />
+                                    <CFormSwitch checked={product.isdownload} onChange={(e) => { product.isdownload = !product.isdownload; setProduct({ ...product }); }} id="isdownload" />
 
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormLabel htmlFor="isrental">Is rental</CFormLabel>
-                                    <CFormSwitch checked={product.isrental} onChange={(e) => { handleUpdate(e, 'isrental'); }} id="isrental" />
+                                    <CFormSwitch checked={product.isrental} onChange={(e) => { product.isrental = !product.isrental; setProduct({ ...product }); }} id="isrental" />
 
                                 </CCol>
                             </CRow>
