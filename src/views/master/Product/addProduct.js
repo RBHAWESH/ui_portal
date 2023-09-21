@@ -9,7 +9,7 @@ import draftToHtml from 'draftjs-to-html';
 import productApi from "../../api/product.api";
 import masterapi from "../../api/master.api";
 import { useParams } from 'react-router-dom';
-
+import CIcon from '@coreui/icons-react'
 import {
     CButton,
     CCard,
@@ -24,7 +24,13 @@ import {
     CRow,
     CFormSelect,
     CFormTextarea,
+    CCardImage,
+    CFormCheck
 } from '@coreui/react'
+import {
+    cilPlus, cilTrash
+} from '@coreui/icons'
+
 
 const CustomStyles = () => {
     const [validated, setValidated] = useState(false);
@@ -43,6 +49,7 @@ const CustomStyles = () => {
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [editorStateShort, setEditorStateShort] = useState(() => EditorState.createEmpty());
     const params = useParams();
+    const [files, setFile] = useState([]);
 
     const handleUpdate = (e, key) => {
         console.log(e.target.value);
@@ -50,6 +57,23 @@ const CustomStyles = () => {
             product[key] = e.target.value;
         }
         setProduct({ ...product });
+    }
+
+    const handleFileChange = (e) => {
+        let imageObj = {
+            src: URL.createObjectURL(e.target.files[0]),
+            id: 0,
+            order: files.length + 1
+        };
+        files.push(imageObj);
+        setFile([...files]);
+        console.log(files);
+        e.target.value = null;
+    }
+
+    const handleDeleteImage = (index) => {
+        files.splice(index, 1);
+        setFile([...files]);
     }
 
     const handleSubmit = (event) => {
@@ -92,12 +116,12 @@ const CustomStyles = () => {
                     }
                     if (result.data.markasnewenddatetimeutc) {
                         setEndDate(new Date(result.data.markasnewenddatetimeutc));
-                    }                  
+                    }
 
                     setProduct({ ...result.data });
                     setEditorState(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(result.data.fulldescription))));
                     setEditorStateShort(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(result.data.shortdescription))));
-                    
+
                 }
             });
     }, [params?.id])
@@ -234,7 +258,7 @@ const CustomStyles = () => {
                                         id="shortdescription"
                                         rows={3}
                                     ></CFormTextarea> */}
-                                     <Editor editorState={editorStateShort}  onEditorStateChange={setEditorStateShort} editorClassName="demo-editor"
+                                    <Editor editorState={editorStateShort} onEditorStateChange={setEditorStateShort} editorClassName="demo-editor"
                                     />
 
                                 </CCol>
@@ -244,7 +268,7 @@ const CustomStyles = () => {
                                         id="exampleFormControlTextarea1"
                                         rows={3}
                                     ></CFormTextarea> */}
-                                    <Editor editorState={editorState}  onEditorStateChange={setEditorState} editorClassName="demo-editor"
+                                    <Editor editorState={editorState} onEditorStateChange={setEditorState} editorClassName="demo-editor"
                                     />
 
                                 </CCol>
@@ -587,9 +611,55 @@ const CustomStyles = () => {
                             </CRow>
                         </CCardBody>
                     </CCard>
+                    <CCard className="mb-4">
+                        <CCardHeader>
+                            <strong>Images</strong>
+                        </CCardHeader>
+                        <CCardBody>
+                            <CRow>
+                                <CCol md={4}>
+                                    <div className="mb-3">
+                                        {/* <CFormLabel htmlFor="formFile">Default file input example</CFormLabel> */}
+                                        <CFormInput onChange={handleFileChange} type="file" size="sm" id="formFile" />
+                                    </div>
+                                </CCol>
+                                <CCol md={4}>
+                                    <CButton shape="rounded-0" size="sm" color="info" variant="outline">
+                                        Submit Images       <CIcon className="text-info" icon={cilPlus} />
+                                    </CButton>
+                                </CCol>
+                            </CRow>
+                            <CRow>
+                                {files.map((item, index) => (
+                                    <CCol md={3}>
+                                        <CCard style={{ width: '12rem' }}>
+                                            <CCardHeader>
+                                                <CRow>
+                                                    <CCol md={4}>
+                                                        <CFormInput value={item.order} placeholder="Order" type="number" size="sm" />
+                                                    </CCol>
+                                                    <CCol md={4}>
+                                                        <CFormCheck type="radio" name="primaryRadio" id="flexRadioDefault1"  size="sm" />
+                                                    </CCol>
+                                                    <CCol md={4}>
+                                                        <CButton onClick={() => handleDeleteImage(index)} style={{ float: 'right' }} shape="rounded-0" size="sm" color="danger" variant="outline">
+                                                            <CIcon className="text-danger" icon={cilTrash} />
+                                                        </CButton>
+                                                    </CCol>
+                                                </CRow>
+
+                                            </CCardHeader>
+                                            <CCardImage height="150" width="150" className="" orientation="top" src={item.src} />
+
+                                        </CCard>
+                                    </CCol>
+                                ))}
+                            </CRow>
+                        </CCardBody>
+                    </CCard>
                 </CCol>
             </CRow>
-        </CForm>
+        </CForm >
     )
 }
 
