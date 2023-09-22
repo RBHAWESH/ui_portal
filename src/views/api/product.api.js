@@ -6,12 +6,15 @@ const productapi = {
   },
   uploadProductImages: async function (imagesData) {
     let formData = new FormData()
-    imagesData.forEach(item => {
+    imagesData.forEach((item, index) => {
+      let fileName = item.productid + "_" + (index + 1) + "_" + item.order + "_" + (item.isprimary ? 1 : 0) + ".png";
+      console.log("fileName", fileName);
+      item.data = new File([item.data], fileName, { type: "image/png" });
       formData.append("file", item.data);
-      //delete item['data']
+
     });
-    formData.append("imageData", JSON.stringify(imagesData));
-    console.log("formData", formData);
+    //formData.append("imageData", JSON.stringify(imagesData));
+    //console.log("formData", formData);
     return await utilutyapi.saveFormData(formData, "product/upload")
   },
   getProduct: async (id) => {

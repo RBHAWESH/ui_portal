@@ -65,7 +65,8 @@ const CustomStyles = () => {
             id: 0,
             order: files.length + 1,
             isprimary: false,
-            data: e.target.files[0]
+            data: e.target.files[0],
+            productid: params.id
         };
         files.push(imageObj);
         setFile([...files]);
