@@ -63,7 +63,9 @@ const CustomStyles = () => {
         let imageObj = {
             src: URL.createObjectURL(e.target.files[0]),
             id: 0,
-            order: files.length + 1
+            order: files.length + 1,
+            isprimary: false,
+            data: e.target.files[0]
         };
         files.push(imageObj);
         setFile([...files]);
@@ -93,6 +95,13 @@ const CustomStyles = () => {
         console.log("data", product);
 
         productApi.saveProduct(product).then(result => {
+            if (result && result.data)
+                alert(result.data);
+        });
+    }
+
+    const handleUpload = () => {
+        productApi.uploadProductImages(files).then(result => {
             if (result && result.data)
                 alert(result.data);
         });
@@ -624,7 +633,7 @@ const CustomStyles = () => {
                                     </div>
                                 </CCol>
                                 <CCol md={4}>
-                                    <CButton shape="rounded-0" size="sm" color="info" variant="outline">
+                                    <CButton onClick={handleUpload} shape="rounded-0" size="sm" color="info" variant="outline">
                                         Submit Images       <CIcon className="text-info" icon={cilPlus} />
                                     </CButton>
                                 </CCol>
@@ -635,13 +644,13 @@ const CustomStyles = () => {
                                         <CCard style={{ width: '12rem' }}>
                                             <CCardHeader>
                                                 <CRow>
-                                                    <CCol md={4}>
+                                                    <CCol md={6}>
                                                         <CFormInput value={item.order} placeholder="Order" type="number" size="sm" />
                                                     </CCol>
-                                                    <CCol md={4}>
-                                                        <CFormCheck type="radio" name="primaryRadio" id="flexRadioDefault1"  size="sm" />
+                                                    <CCol md={3}>
+                                                        <CFormCheck checked={item.isprimary} onChange={(e) => { item.isprimary = !item.isprimary; setFile([...files]); }} type="radio" name="primaryRadio" id="flexRadioDefault1" size="sm" />
                                                     </CCol>
-                                                    <CCol md={4}>
+                                                    <CCol md={3}>
                                                         <CButton onClick={() => handleDeleteImage(index)} style={{ float: 'right' }} shape="rounded-0" size="sm" color="danger" variant="outline">
                                                             <CIcon className="text-danger" icon={cilTrash} />
                                                         </CButton>

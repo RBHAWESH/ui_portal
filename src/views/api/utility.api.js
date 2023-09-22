@@ -19,7 +19,6 @@ const utilutyapi = {
   },
   saveItem: async function (item, endPoint) {
     try {
-        console.log("api req",item);
       const rawResponse = await fetch(baseUrl + endPoint, {
         method: "POST",
         headers: {
@@ -35,6 +34,27 @@ const utilutyapi = {
       return null;
     }
   },
+  saveFormData: async function (item, endPoint) {
+    try {
+      const rawResponse = await fetch(baseUrl + endPoint, {
+        method: "POST",
+        headers: {
+          "timeout": 0,
+          "processData": false,
+          "mimeType": "multipart/form-data",
+          "contentType": false,
+          "data": item
+          //   Authorization: Utilities.getAuthoriztion(),
+        },
+        body: item,
+      });
+
+      return await (rawResponse.ok ? rawResponse.text() : null);
+    } catch (error) {
+      return null;
+    }
+  },
+  
 };
 
 export default utilutyapi;

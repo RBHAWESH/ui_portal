@@ -2,7 +2,17 @@ import utilutyapi from "./utility.api";
 let baseUrl = "http://localhost:8080/api/";
 const productapi = {
   saveProduct: async function (product) {
-     return utilutyapi.saveItem(product,"product")
+    return await utilutyapi.saveItem(product, "product")
+  },
+  uploadProductImages: async function (imagesData) {
+    let formData = new FormData()
+    imagesData.forEach(item => {
+      formData.append("file", item.data);
+      //delete item['data']
+    });
+    formData.append("imageData", JSON.stringify(imagesData));
+    console.log("formData", formData);
+    return await utilutyapi.saveFormData(formData, "product/upload")
   },
   getProduct: async (id) => {
     try {
@@ -24,7 +34,7 @@ const productapi = {
     }
   },
   getProducts: async () => {
-    return await utilutyapi.getItems("products/all");    
+    return await utilutyapi.getItems("products/all");
   },
   getProductById: async (id) => {
     try {
@@ -42,7 +52,7 @@ const productapi = {
       alert("Error " + error);
       return null;
     }
-  }, 
+  },
 };
 
 export default productapi;
