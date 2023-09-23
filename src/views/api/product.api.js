@@ -7,8 +7,7 @@ const productapi = {
   uploadProductImages: async function (imagesData) {
     let formData = new FormData()
     imagesData.forEach((item, index) => {
-      let fileName = item.productid + "_" + (index + 1) + "_" + item.order + "_" + (item.isprimary ? 1 : 0) + ".png";
-      console.log("fileName", fileName);
+      let fileName = item.productid + "_" + (index + 1) + "_" + item.order + "_" + (item.isprimary ? 1 : 0) + "_img.png";     
       item.data = new File([item.data], fileName, { type: "image/png" });
       formData.append("file", item.data);
 
