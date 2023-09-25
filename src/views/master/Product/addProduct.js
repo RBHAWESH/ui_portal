@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Editor } from 'react-draft-wysiwyg';
@@ -24,11 +24,15 @@ import {
     CRow,
     CFormSelect,
     CFormTextarea,
-    CCardImage,
-    CFormCheck
+    CTable,
+    CTableBody,
+    CTableDataCell,
+    CTableHead,
+    CTableHeaderCell,
+    CTableRow,
 } from '@coreui/react'
 import {
-    cilPlus, cilTrash
+    cilTrash, cilPencil, cilCloudUpload
 } from '@coreui/icons'
 
 
@@ -50,6 +54,9 @@ const CustomStyles = () => {
     const [editorStateShort, setEditorStateShort] = useState(() => EditorState.createEmpty());
     const params = useParams();
     const [files, setFile] = useState([]);
+    const [images, setImages] = useState([]);
+    const [currentIndex, setcurrentIndex] = useState(-1);
+    const fileRef = useRef();
 
     const handleUpdate = (e, key) => {
         console.log(e.target.value);
@@ -61,9 +68,9 @@ const CustomStyles = () => {
 
     const handleFileChange = (e) => {
         let imageObj = {
-            src: URL.createObjectURL(e.target.files[0]),
+            imgsrc: URL.createObjectURL(e.target.files[0]),
             id: 0,
-            order: files.length + 1,
+            display_order: 0,
             isprimary: false,
             data: e.target.files[0],
             productid: params.id
@@ -71,12 +78,42 @@ const CustomStyles = () => {
         files.push(imageObj);
         setFile([...files]);
         console.log(files);
-        e.target.value = null;
+        //e.target.value = null;
     }
 
     const handleDeleteImage = (index) => {
-        files.splice(index, 1);
-        setFile([...files]);
+        if (images.length > 0) {
+            productApi.removeProduct(images[index].id, params?.id).then(result => {
+                result = JSON.parse(result);
+                if (result.data) {
+                    setImages(result.data);
+                }
+            });
+        }
+    }
+
+    const handleEditClick = (index) => {
+        setcurrentIndex(index);
+    }
+
+    const handleSaveClick = (index) => {
+        productApi.updateProductImage(images[index].id, params?.id, images[index].display_order).then(result => {
+            result = JSON.parse(result);
+            if (result.data) {
+                setImages(result.data);
+                setcurrentIndex(-1);
+            }
+        });
+        
+    }
+
+    const handleCancelClick = (index) => {
+        setcurrentIndex(-1);
+    }
+
+    const onEditClick = (e, index) => {
+        images[index].display_order = e.currentTarget.value;
+        setImages(images);
     }
 
     const handleSubmit = (event) => {
@@ -102,9 +139,10 @@ const CustomStyles = () => {
     }
 
     const handleUpload = () => {
-        productApi.uploadProductImages(files).then(result => {
-            if (result && result.data)
-                alert(result.data);
+        productApi.uploadProductImages(files, params?.id).then(result => {
+            setFile([]);
+            fileRef.current.value = null;
+            getProductImages(params?.id);
         });
     }
 
@@ -134,6 +172,7 @@ const CustomStyles = () => {
 
                 }
             });
+        getProductImages(params?.id);
     }, [params?.id])
 
     const getBrands = () => {
@@ -198,6 +237,15 @@ const CustomStyles = () => {
                 setStores(result.data);
         });
     }
+
+    const getProductImages = (id) => {
+        productApi.getProductImages(id).then(result => {
+            if (result.data)
+                setImages(result.data);
+        });
+    }
+
+
 
     return (
 
@@ -629,41 +677,65 @@ const CustomStyles = () => {
                             <CRow>
                                 <CCol md={4}>
                                     <div className="mb-3">
-                                        {/* <CFormLabel htmlFor="formFile">Default file input example</CFormLabel> */}
-                                        <CFormInput onChange={handleFileChange} type="file" size="sm" id="formFile" />
+                                        <CFormInput onChange={handleFileChange} type="file" size="sm" id="formFile" ref={fileRef} />
                                     </div>
                                 </CCol>
                                 <CCol md={4}>
                                     <CButton onClick={handleUpload} shape="rounded-0" size="sm" color="info" variant="outline">
-                                        Submit Images       <CIcon className="text-info" icon={cilPlus} />
+                                        Upload Images       <CIcon className="text-info" icon={cilCloudUpload} />
                                     </CButton>
                                 </CCol>
                             </CRow>
                             <CRow>
-                                {files.map((item, index) => (
-                                    <CCol md={3}>
-                                        <CCard style={{ width: '12rem' }}>
-                                            <CCardHeader>
-                                                <CRow>
-                                                    <CCol md={6}>
-                                                        <CFormInput value={item.order} placeholder="Order" type="number" size="sm" />
-                                                    </CCol>
-                                                    <CCol md={3}>
-                                                        <CFormCheck checked={item.isprimary} onChange={(e) => { item.isprimary = !item.isprimary; setFile([...files]); }} type="radio" name="primaryRadio" id="flexRadioDefault1" size="sm" />
-                                                    </CCol>
-                                                    <CCol md={3}>
-                                                        <CButton onClick={() => handleDeleteImage(index)} style={{ float: 'right' }} shape="rounded-0" size="sm" color="danger" variant="outline">
-                                                            <CIcon className="text-danger" icon={cilTrash} />
-                                                        </CButton>
-                                                    </CCol>
-                                                </CRow>
+                                <CTable align="middle" className="mb-0 border mt-1" hover responsive>
+                                    <CTableHead color="light">
+                                        <CTableRow>
+                                            <CTableHeaderCell>Picture</CTableHeaderCell>
+                                            <CTableHeaderCell>Display order	</CTableHeaderCell>
 
-                                            </CCardHeader>
-                                            <CCardImage height="150" width="150" className="" orientation="top" src={item.src} />
+                                            <CTableHeaderCell className="text-center">Edit</CTableHeaderCell>
+                                            <CTableHeaderCell className="text-center">Delete</CTableHeaderCell>
+                                        </CTableRow>
+                                    </CTableHead>
+                                    <CTableBody>
+                                        {images.map((item, index) => (
+                                            <CTableRow v-for="item in files" key={index}>
+                                                <CTableDataCell>
+                                                    <img sizes='sm' height="120" width="120" src={item.imgsrc} className="App-logo" alt="logo" />
+                                                </CTableDataCell>
+                                                <CTableDataCell>
+                                                    {/* <div>{item.display_order}</div> */}
+                                                    <div> {currentIndex === index ? <CFormInput type="number" size="sm" label={item.display_order}  onChange={(e) => onEditClick(e, index)} /> : <div>{item.display_order}</div>}</div>
+                                                </CTableDataCell>
+                                                <CTableDataCell className="text-center">
+                                                    {currentIndex !== index ?
+                                                        <div>
+                                                            <CButton onClick={() => handleEditClick(index)} color="info" variant="outline">
+                                                                <CIcon className="text-info" icon={cilPencil} />
+                                                            </CButton>
+                                                        </div>
+                                                        :
+                                                        (
+                                                            <div> <CButton onClick={() => handleSaveClick(index)} color="info" variant="outline">
+                                                                Save
+                                                            </CButton>
+                                                                <CButton onClick={() => handleCancelClick(index)} color="info" variant="outline">
+                                                                    Cancel
+                                                                </CButton>
+                                                            </div>
+                                                        )
+                                                    }
+                                                </CTableDataCell>
+                                                <CTableDataCell className="text-center">
+                                                    <CButton onClick={() => handleDeleteImage(index)} color="danger" variant="outline">
+                                                        <CIcon className="text-danger" icon={cilTrash} />
+                                                    </CButton>
+                                                </CTableDataCell>
 
-                                        </CCard>
-                                    </CCol>
-                                ))}
+                                            </CTableRow>
+                                        ))}
+                                    </CTableBody>
+                                </CTable>
                             </CRow>
                         </CCardBody>
                     </CCard>

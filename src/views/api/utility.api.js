@@ -54,7 +54,23 @@ const utilutyapi = {
       return null;
     }
   },
-  
+  updateItem: async function (item, endPoint) {
+    try {
+      const rawResponse = await fetch(baseUrl + endPoint, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          //   Authorization: Utilities.getAuthoriztion(),
+        },
+        body: JSON.stringify(item),
+      });
+
+      return await (rawResponse.ok ? rawResponse.text() : null);
+    } catch (error) {
+      return null;
+    }
+  },
 };
 
 export default utilutyapi;

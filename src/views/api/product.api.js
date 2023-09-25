@@ -4,16 +4,30 @@ const productapi = {
   saveProduct: async function (product) {
     return await utilutyapi.saveItem(product, "product")
   },
-  uploadProductImages: async function (imagesData) {
-    let formData = new FormData()
+  removeProduct: async function (imageid, productid) {
+    const image = {
+      id: imageid,
+      productid: productid
+    }
+    return await utilutyapi.saveItem(image, "product/images/remove")
+  },
+  updateProductImage: async function (imageid, productid, display_order) {
+    const image = {
+      id: imageid,
+      productid: productid,
+      display_order: display_order
+    }
+    return await utilutyapi.updateItem(image, "product/images")
+  },
+  uploadProductImages: async function (imagesData, productid) {
+    let formData = new FormData();
+    imagesData = imagesData.filter(i => i.id === 0);
     imagesData.forEach((item, index) => {
-      let fileName = item.productid + "_" + (index + 1) + "_" + item.order + "_" + (item.isprimary ? 1 : 0) + "_img.png";     
-      item.data = new File([item.data], fileName, { type: "image/png" });
+      let fileName = item.productid + "_" + (index + 1) + "_" + item.display_order + "_" + (item.isprimary ? 1 : 0) + "_img.png";
+      item.data = new File([item.data], fileName, { type: "image/png;image/jpeg" });
       formData.append("file", item.data);
-
+      formData.append("productid", productid);
     });
-    //formData.append("imageData", JSON.stringify(imagesData));
-    //console.log("formData", formData);
     return await utilutyapi.saveFormData(formData, "product/upload")
   },
   getProduct: async (id) => {
@@ -54,6 +68,9 @@ const productapi = {
       alert("Error " + error);
       return null;
     }
+  },
+  getProductImages: async (id) => {
+    return await utilutyapi.getItems("product/images/" + id);
   },
 };
 
