@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import CIcon from '@coreui/icons-react'
 import { useNavigate } from "react-router-dom";
+import masterApi from "../../api/master.api";
 import {
     CTable,
     CTableBody,
@@ -19,38 +20,16 @@ import {
 } from '@coreui/icons'
 
 const Dashboard = () => {
-
+    const [currency, setCurrency] = useState([]);
     const navigate = useNavigate();
     const handleClick = () => {
         navigate("/master/currency");
-      }
-
-    const tableExample = [
-        {
-            name: 'INR',
-            symbol: '₹',
-            exchangeRate: '0',
-            published: true,
-            isprimary: true,
-            registered: 'Jan 1, 2021',
-        },
-        {
-            name: 'USD',
-            symbol: '$',
-            exchangeRate: '80',
-            published: true,
-            isprimary: false,
-            registered: 'Jan 1, 2021',
-        },
-        {
-            name: 'AED',
-            symbol: 'AED',
-            exchangeRate: '20',
-            published: true,
-            isprimary: false,
-            registered: 'Jan 1, 2021',
-        },
-    ]
+    }
+    useEffect(() => {
+        masterApi.getCurrency().then(result => {
+            setCurrency(result.data);
+        });
+    }, [])    
 
     return (
         <>
@@ -78,27 +57,24 @@ const Dashboard = () => {
                                 </CTableRow>
                             </CTableHead>
                             <CTableBody>
-                                {tableExample.map((item, index) => (
-                                    <CTableRow v-for="item in tableItems" key={index}>
+                                {currency.map((item, index) => (
+                                    <CTableRow v-for="item in currency" key={index}>
 
                                         <CTableDataCell>
                                             <div>{item.name}</div>
-                                            <div className="small text-medium-emphasis">
-                                                Registered:{' '}
-                                                {item.registered}
-                                            </div>
+                                           
                                         </CTableDataCell>
                                         <CTableDataCell>
                                             <div>{item.symbol}</div>
                                         </CTableDataCell>
                                         <CTableDataCell>
-                                            <div>{item.exchangeRate}</div>
+                                            <div>{item.exchange_rate}</div>
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CFormSwitch id="formSwitchCheckCheckedDisabled" defaultChecked disabled />
+                                            <CFormSwitch id="published" checked={item.published} disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CFormSwitch id="formSwitchCheckCheckedDisabled" defaultChecked disabled />
+                                            <CFormSwitch id="is_primary" checked={item.is_primary} disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
                                             <CButton color="info" variant="outline">

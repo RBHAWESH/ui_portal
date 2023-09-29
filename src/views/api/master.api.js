@@ -29,6 +29,15 @@ const masterapi = {
   getStores: async () => {
     return await utilutyapi.getItems("stores/all");
   },
+  getCategories: async () => {
+    return await utilutyapi.getItems("categories/published/all");    
+  },
+  getBrands: async () => {
+    return await utilutyapi.getItems("brand/published/all");
+  },
+  getCurrency: async () => {
+    return await utilutyapi.getItems("currency/all");
+  },
 };
 
 export default masterapi;

@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import CIcon from '@coreui/icons-react'
 import { useNavigate } from "react-router-dom";
+import masterApi from "../../api/master.api";
+import xlsxfile from 'src/views/common/utilities/excel';
 import {
     CTable,
     CTableBody,
@@ -13,29 +15,30 @@ import {
     CCard,
     CCardBody,
     CRow,
+    CInputGroup,
+    CFormInput
 } from '@coreui/react'
 import {
     cilPencil, cilPlus
 } from '@coreui/icons'
 
 const Dashboard = () => {
+    const [brands, setBrands] = useState([]);
     const navigate = useNavigate();
     const handleClick = () => {
         navigate("/master/brand");
-      }
+    }
 
-    const tableExample = [
-        {
-            name: 'Aveeno',
-            published: true,
-            registered: 'Jan 1, 2021',
-        },
-        {
-            name: 'ACURE',
-            published: true,
-            registered: 'Jan 1, 2021',
-        },
-    ]
+    useEffect(() => {
+        masterApi.getBrands().then(result => {
+            setBrands(result.data);
+        });
+    }, [])
+
+    const handleFileChange = (e) => {
+       const data = xlsxfile.read(e);
+       console.log("excel data", data);
+    }
 
     return (
         <>
@@ -43,14 +46,20 @@ const Dashboard = () => {
                 <CCardBody>
 
                     <CRow>
-                        <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <CButton onClick={handleClick}  shape="rounded-0" size="sm" color="info" variant="outline">
+                        <div className="col-sm-6 justify-content-md-end">
+                            <CButton onClick={handleClick} shape="rounded-0" size="sm" color="info" variant="outline">
                                 Add New      <CIcon className="text-info" icon={cilPlus} />
                             </CButton>
                         </div>
+                        <div className="col-sm-6 justify-content-md-end">
+                            <CInputGroup className="mb-1">
+                                <CFormInput onChange={handleFileChange} type="file" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" />
+                                <CButton type="button" size="sm" color="info" variant="outline" id="inputGroupFileAddon04">Import</CButton>
+                            </CInputGroup>
+                        </div>
                     </CRow>
                     <CRow>
-                        <CTable  align="middle" className="mb-0 border mt-1" hover responsive>
+                        <CTable align="middle" className="mb-0 border mt-1" hover responsive>
                             <CTableHead color="light">
                                 <CTableRow>
 
@@ -60,18 +69,15 @@ const Dashboard = () => {
                                 </CTableRow>
                             </CTableHead>
                             <CTableBody>
-                                {tableExample.map((item, index) => (
+                                {brands.map((item, index) => (
                                     <CTableRow v-for="item in tableItems" key={index}>
 
                                         <CTableDataCell>
                                             <div>{item.name}</div>
-                                            <div className="small text-medium-emphasis">
-                                                Registered:{' '}
-                                                {item.registered}
-                                            </div>
+
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CFormSwitch id="formSwitchCheckCheckedDisabled" defaultChecked disabled />
+                                            <CFormSwitch checked={item.published} defaultChecked disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
                                             <CButton color="info" variant="outline">

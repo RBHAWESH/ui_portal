@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import CIcon from '@coreui/icons-react'
 import { useNavigate } from "react-router-dom";
+import masterApi from "../../api/master.api";
 import {
     CTable,
     CTableBody,
@@ -19,25 +20,17 @@ import {
 } from '@coreui/icons'
 
 const Dashboard = () => {
-
+    const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
     const handleClick = () => {
         navigate("/master/category");
-      }
+    }
 
-    const tableExample = [
-        {
-            name: 'Supplements',
-            published: true,
-            registered: 'Jan 1, 2021',
-        },
-        {
-            name: 'Sports',
-            published: true,
-            registered: 'Jan 1, 2021',
-        },
-    ]
-
+    useEffect(() => {
+        masterApi.getCategories().then(result => {
+            setCategories(result.data);
+        });
+    }, [])
     return (
         <>
             <CCard className="mb-4">
@@ -45,13 +38,13 @@ const Dashboard = () => {
 
                     <CRow>
                         <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <CButton onClick={handleClick} shape="rounded-0" size="sm" color="info" variant="outline">
+                            <CButton onClick={handleClick} shape="rounded-0" size="sm" color="info" variant="outline">
                                 Add New      <CIcon className="text-info" icon={cilPlus} />
                             </CButton>
                         </div>
                     </CRow>
                     <CRow>
-                        <CTable  align="middle" className="mb-0 border mt-1" hover responsive>
+                        <CTable align="middle" className="mb-0 border mt-1" hover responsive>
                             <CTableHead color="light">
                                 <CTableRow>
 
@@ -61,18 +54,14 @@ const Dashboard = () => {
                                 </CTableRow>
                             </CTableHead>
                             <CTableBody>
-                                {tableExample.map((item, index) => (
-                                    <CTableRow v-for="item in tableItems" key={index}>
+                                {categories.map((item, index) => (
+                                    <CTableRow v-for="item in categories" key={index}>
 
                                         <CTableDataCell>
-                                            <div>{item.name}</div>
-                                            <div className="small text-medium-emphasis">
-                                                Registered:{' '}
-                                                {item.registered}
-                                            </div>
+                                            <div>{item.Name}</div>
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CFormSwitch id="formSwitchCheckCheckedDisabled" defaultChecked disabled />
+                                            <CFormSwitch id="formSwitchCheckCheckedDisabled" checked={item.published} disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
                                             <CButton color="info" variant="outline">
