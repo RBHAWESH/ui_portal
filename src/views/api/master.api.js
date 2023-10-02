@@ -3,7 +3,7 @@ import utilutyapi from "./utility.api";
 const masterapi = {
 
   getPublishedCategories: async () => {
-    return await utilutyapi.getItems("categories/published/all");    
+    return await utilutyapi.getItems("categories/published/all");
   },
   getPublishedBrands: async () => {
     return await utilutyapi.getItems("brand/published/all");
@@ -30,13 +30,19 @@ const masterapi = {
     return await utilutyapi.getItems("stores/all");
   },
   getCategories: async () => {
-    return await utilutyapi.getItems("categories/published/all");    
+    return await utilutyapi.getItems("categories/published/all");
   },
   getBrands: async () => {
     return await utilutyapi.getItems("brand/published/all");
   },
   getCurrency: async () => {
     return await utilutyapi.getItems("currency/all");
+  },
+  saveBrand: async function (brand) {
+    return await utilutyapi.saveItem(brand, "brand")
+  },
+  getBrandById: async (id) => {
+    return await utilutyapi.getItems("brand/" + id);
   },
 };
 

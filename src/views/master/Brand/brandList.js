@@ -35,9 +35,9 @@ const Dashboard = () => {
         });
     }, [])
 
-    const handleFileChange = (e) => {
-       const data = xlsxfile.read(e);
-       console.log("excel data", data);
+    const handleFileChange = async (e) => {
+        const data = await xlsxfile.read(e);
+        console.log("excel data", data);
     }
 
     return (
