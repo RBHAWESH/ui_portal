@@ -29,7 +29,11 @@ const Dashboard = () => {
         masterApi.getCurrency().then(result => {
             setCurrency(result.data);
         });
-    }, [])    
+    }, [])
+    
+    const handleEditClick = (id) => {
+        navigate("/master/currency/" + id);
+    }
 
     return (
         <>
@@ -77,7 +81,7 @@ const Dashboard = () => {
                                             <CFormSwitch id="is_primary" checked={item.is_primary} disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CButton color="info" variant="outline">
+                                            <CButton onClick={() => handleEditClick(item.id)} color="info" variant="outline">
                                                 <CIcon className="text-info" icon={cilPencil} />
                                             </CButton>
                                         </CTableDataCell>

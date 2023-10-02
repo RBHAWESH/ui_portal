@@ -40,6 +40,10 @@ const Dashboard = () => {
         console.log("excel data", data);
     }
 
+    const handleEditClick = (id) => {
+        navigate("/master/brand/" + id);
+    }
+
     return (
         <>
             <CCard className="mb-4">
@@ -80,7 +84,7 @@ const Dashboard = () => {
                                             <CFormSwitch checked={item.published} defaultChecked disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CButton color="info" variant="outline">
+                                            <CButton onClick={() => handleEditClick(item.id)} color="info" variant="outline">
                                                 <CIcon className="text-info" icon={cilPencil} />
                                             </CButton>
                                         </CTableDataCell>

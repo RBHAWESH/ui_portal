@@ -44,6 +44,12 @@ const masterapi = {
   getBrandById: async (id) => {
     return await utilutyapi.getItems("brand/" + id);
   },
+  getCurrencyById: async (id) => {
+    return await utilutyapi.getItems("currency/" + id);
+  },
+  saveCurrency: async function (currency) {
+    return await utilutyapi.saveItem(currency, "currency")
+  },
 };
 
 export default masterapi;
