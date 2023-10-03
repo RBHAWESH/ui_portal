@@ -116,6 +116,7 @@ const routes = [
   { path: '/master/product/:id', name: 'Product', element: AddProduct },
   { path: '/master/brand/:id', name: 'Product', element: AddBrand },
   { path: '/master/currency/:id', name: 'Currency', element: AddCurrency },
+  { path: '/master/category/:id', name: 'Currency', element: AddCategory },
 ]
 
 export default routes

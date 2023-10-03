@@ -30,7 +30,7 @@ const Dashboard = () => {
     }
 
     useEffect(() => {
-        masterApi.getBrands().then(result => {
+        masterApi.getAllBrands().then(result => {
             setBrands(result.data);
         });
     }, [])

@@ -67,6 +67,11 @@ const CustomStyles = () => {
                 <CFormFeedback valid>Looks good!</CFormFeedback>
             </CCol>
             <CCol md={4}>
+                <CFormLabel htmlFor="display_order">Display Order	</CFormLabel>
+                <CFormInput value={currency.display_order} onChange={(e) => { handleUpdate(e, 'display_order'); }} type="text" id="display_order" required />
+                <CFormFeedback valid>Looks good!</CFormFeedback>
+            </CCol>
+            <CCol md={4}>
                 <CFormLabel htmlFor="is_primary">Is Primary</CFormLabel>
                 <CFormSwitch checked={currency.is_primary} onChange={(e) => { currency.is_primary = !currency.is_primary; setCurrency({ ...currency }); }} id="is_primary" />
             </CCol>

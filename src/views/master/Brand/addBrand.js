@@ -59,6 +59,11 @@ const CustomStyles = () => {
                 <CFormInput value={brand.name} onChange={(e) => { handleUpdate(e, 'name'); }} type="text" id="name" required />
                 <CFormFeedback valid>Looks good!</CFormFeedback>
             </CCol>
+            <CCol md={4}>
+                <CFormLabel htmlFor="display_order">Display Order</CFormLabel>
+                <CFormInput value={brand.display_order} onChange={(e) => { handleUpdate(e, 'display_order'); }} type="text" id="display_order" required />
+                <CFormFeedback valid>Looks good!</CFormFeedback>
+            </CCol>
             <CCol md={12}>
                 <CFormLabel htmlFor="published">Published</CFormLabel>
                 <CFormSwitch checked={brand.published} onChange={(e) => { brand.published = !brand.published; setBrand({ ...brand }); }} id="published" />

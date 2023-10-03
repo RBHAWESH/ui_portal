@@ -25,9 +25,11 @@ const Dashboard = () => {
     const handleClick = () => {
         navigate("/master/category");
     }
-
+    const handleEditClick = (id) => {
+        navigate("/master/category/" + id);
+    }
     useEffect(() => {
-        masterApi.getCategories().then(result => {
+        masterApi.getAllCategories().then(result => {
             setCategories(result.data);
         });
     }, [])
@@ -61,10 +63,10 @@ const Dashboard = () => {
                                             <div>{item.Name}</div>
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CFormSwitch id="formSwitchCheckCheckedDisabled" checked={item.published} disabled />
+                                            <CFormSwitch id="published" checked={item.published} disabled />
                                         </CTableDataCell>
                                         <CTableDataCell className="text-center">
-                                            <CButton color="info" variant="outline">
+                                            <CButton onClick={() => handleEditClick(item.id)} color="info" variant="outline">
                                                 <CIcon className="text-info" icon={cilPencil} />
                                             </CButton>
                                         </CTableDataCell>

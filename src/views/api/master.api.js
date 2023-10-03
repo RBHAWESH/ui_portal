@@ -32,8 +32,14 @@ const masterapi = {
   getCategories: async () => {
     return await utilutyapi.getItems("categories/published/all");
   },
+  getAllCategories: async () => {
+    return await utilutyapi.getItems("categories/all");
+  },
   getBrands: async () => {
     return await utilutyapi.getItems("brand/published/all");
+  },
+  getAllBrands: async () => {
+    return await utilutyapi.getItems("brand/all");
   },
   getCurrency: async () => {
     return await utilutyapi.getItems("currency/all");
@@ -49,6 +55,12 @@ const masterapi = {
   },
   saveCurrency: async function (currency) {
     return await utilutyapi.saveItem(currency, "currency")
+  },
+  getCategoryById: async (id) => {
+    return await utilutyapi.getItems("category/" + id);
+  },
+  saveCategory: async function (category) {
+    return await utilutyapi.saveItem(category, "categories")
   },
 };
 
