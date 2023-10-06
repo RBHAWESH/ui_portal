@@ -24,24 +24,42 @@ import {
 
 const Dashboard = () => {
     const [brands, setBrands] = useState([]);
+    const [excelData, setExcelData] = useState([]);
     const navigate = useNavigate();
     const handleClick = () => {
         navigate("/master/brand");
     }
 
     useEffect(() => {
+       getAllBrands();
+    }, [])
+
+    const getAllBrands = async () => {
         masterApi.getAllBrands().then(result => {
             setBrands(result.data);
         });
-    }, [])
+    }
 
     const handleFileChange = async (e) => {
         const data = await xlsxfile.read(e);
         console.log("excel data", data);
+        const jsonData = await xlsxfile.convertToJson(data);
+        console.log("json data", jsonData);
+        setExcelData(jsonData);
     }
 
     const handleEditClick = (id) => {
         navigate("/master/brand/" + id);
+    }
+
+    const handleImportClick = () => {
+        if (excelData.length === 0) {
+            alert('Please select csv file')
+        }
+        masterApi.importBrand(excelData).then(result => {
+            setExcelData([]);
+            getAllBrands();
+        });
     }
 
     return (
@@ -58,7 +76,7 @@ const Dashboard = () => {
                         <div className="col-sm-6 justify-content-md-end">
                             <CInputGroup className="mb-1">
                                 <CFormInput onChange={handleFileChange} type="file" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" />
-                                <CButton type="button" size="sm" color="info" variant="outline" id="inputGroupFileAddon04">Import</CButton>
+                                <CButton onClick={handleImportClick} type="button" size="sm" color="info" variant="outline" id="inputGroupFileAddon04">Import</CButton>
                             </CInputGroup>
                         </div>
                     </CRow>

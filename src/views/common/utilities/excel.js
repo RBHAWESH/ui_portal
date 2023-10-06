@@ -22,6 +22,23 @@ const xlsxfile = {
             };
             reader.readAsBinaryString(f);
         });
+    },
+    convertToJson: async function (arrData) {
+        if (arrData && arrData.length > 0) {
+            let jsonList = [];
+            let keys = arrData[0];
+            if (keys.length > 0) {
+                for (let index = 1; index < arrData.length; index++) {
+                    var obj = { published: true }
+                    for (let j = 0; j < keys.length; j++) {
+                        obj[keys[j]] = arrData[index][j];
+                    }
+                    jsonList.push(obj);
+                }
+            }
+            return jsonList;
+        }
     }
 };
+
 export default xlsxfile;
