@@ -28,7 +28,7 @@ const _nav = [
   },
   {
     component: CNavGroup,
-    name: 'Master',
+    name: 'Catelog',
     to: '/base',
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
     items: [
@@ -52,6 +52,24 @@ const _nav = [
         name: 'Products',
         to: '/master/products',
       },
+      {
+        component: CNavItem,
+        name: 'Banners',
+        to: '/master/banners',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Customers',
+    to: '/base',
+    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Vendors',
+        to: '/master/vendors',
+      },      
     ],
   },
   // {

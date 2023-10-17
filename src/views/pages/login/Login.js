@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 // import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -17,10 +18,15 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import authapi from 'src/views/api/auth.api'
 import { User } from 'src/views/model/user.model'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const Login = () => {
   const [validated, setValidated] = useState(false)
   const [user, setUser] = useState(User.getEmptyUser());
+  const notify = (text) => toast(text);
+  const navigate = useNavigate();
   const handleSubmit = (event) => {
     const form = event.currentTarget
     if (form.checkValidity() === false) {
@@ -30,9 +36,17 @@ const Login = () => {
     setValidated(true)
 
     authapi.login(user).then(result => {
-      console.log(result);
-      if (result && result.data)
-        alert(result.data);
+      let response = JSON.parse(result);
+     // console.log(result);
+      if (response){
+      
+        console.log(response.message);
+        notify(response.message);
+        if(response.status === 200){
+          navigate("/dashboard");
+        }
+      }
+        
     });
   }
   const handleUpdate = (e, key) => {
@@ -74,7 +88,7 @@ const Login = () => {
                         <CButton type="submit" color="primary" className="px-4">
                           Login
                         </CButton>
-                     
+
                       </CCol>
                       <CCol xs={6} className="text-right">
                         <CButton color="link" className="px-0">
@@ -90,6 +104,7 @@ const Login = () => {
           </CCol>
         </CRow>
       </CContainer>
+      <ToastContainer />
     </div>
   )
 }

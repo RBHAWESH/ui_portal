@@ -65,6 +65,12 @@ const masterapi = {
   importBrand: async function (brands) {
     return await utilutyapi.saveItem(brands, "import/brand")
   },
+  getAllBanners: async () => {
+    return await utilutyapi.getItems("banners");
+  },
+  getAllVendors: async () => {
+    return await utilutyapi.getItems("vendor/all");
+  },
 };
 
 export default masterapi;
