@@ -28,6 +28,7 @@ const Login = () => {
   const notify = (text) => toast(text);
   const navigate = useNavigate();
   const handleSubmit = (event) => {
+    debugger;
     const form = event.currentTarget
     if (form.checkValidity() === false) {
       event.preventDefault()

@@ -72,6 +72,19 @@ const _nav = [
       },      
     ],
   },
+  {
+    component: CNavGroup,
+    name: 'Sales',
+    to: '/base',
+    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Orders',
+        to: '/sales/orders',
+      },      
+    ],
+  },
   // {
   //   component: CNavTitle,
   //   name: 'Theme',

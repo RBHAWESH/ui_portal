@@ -71,6 +71,23 @@ const utilutyapi = {
       return null;
     }
   },
+  getInvoice: async (endPoint) => {
+    try {
+      const rawResponse = await fetch(baseUrl + "orders/tax/invoice/4862b8ea-8c08-11ee-96b4-5cba2c200177", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json;UTF-8",
+          //   Authorization: Utilities.getAuthoriztion(),
+        },
+      });
+
+      return await (rawResponse.status === 200 ? rawResponse.json() : null);
+    } catch (error) {
+      alert("Error " + error);
+      return null;
+    }
+  },
 };
 
 export default utilutyapi;

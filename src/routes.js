@@ -64,6 +64,9 @@ const BannerList = React.lazy(() => import('./views/master/Banners/bannerList'))
 //Customers
 const VendorsList = React.lazy(() => import('./views/customers/Vendors/vendorList'))
 
+//Sales
+const OrderList = React.lazy(() => import('./views/sales/Order/orderList'))
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
@@ -123,6 +126,7 @@ const routes = [
   { path: '/master/category/:id', name: 'Currency', element: AddCategory },
   { path: '/master/banners', name: 'Banners', element: BannerList },
   { path: '/master/vendors', name: 'Vendors', element: VendorsList },
+  { path: '/sales/orders', name: 'Orders', element: OrderList },
 ]
 
 export default routes
