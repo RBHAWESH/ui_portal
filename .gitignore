@@ -23,3 +23,5 @@ yarn.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.sqlite
+/.vs/git2/FileContentIndex
