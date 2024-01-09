@@ -118,10 +118,34 @@ const Orders = () => {
   }
 
   const handlePrintSlipClick = () => {
-    debugger;
-    /*    console.log(orderId)*/
     if (invoiceTest && Object.keys(invoiceTest).length > 0) {
       setShowPdfWindow(!showPdfWindow);
+    }
+  }
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1); // No of pages
+  const recordsPerPage = 5;
+  const lastIndex = currentPage * recordsPerPage;
+  const firstIndex = lastIndex - recordsPerPage;
+  const records = orders.slice(firstIndex, lastIndex);
+  const nPage = Math.ceil(orders.length / recordsPerPage);
+  const numbers = [...Array(nPage + 1).keys()].slice(1);
+
+
+  const prevPage = () => {
+    if (currentPage !== 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  }
+
+  const changePage = (n) => {
+    setCurrentPage(n);
+  }
+
+  const nextPage = () => {
+    if (currentPage !== nPage) {
+      setCurrentPage(currentPage + 1);
     }
   }
 
@@ -150,19 +174,19 @@ const Orders = () => {
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {orders.map((item, index) => (
-                  <CTableRow v-for="item in orders" key={index}>
+                {records.map((item, index) => (
+                  <CTableRow v-for="item in records" key={index}>
                     <CTableDataCell>
                       <div><strong>{item.time}</strong></div>
                       <div>{item.orderdate}</div>
                     </CTableDataCell>
                     <CTableDataCell>
-                      <div>{item.orderid}</div>
+                      <div><a className="a-text-underline" href="#">{item.orderid}</a></div>
                       <div>Buyer name: {item.buyername}</div>
                     </CTableDataCell>
                     <CTableDataCell>
                       {item.products.map((p, pi) => (
-                        <div v-for="item in orders" key={pi}>
+                        <div v-for="item in records" key={pi}>
                           <div>
                             <CImage src={p.image} width={90} height={90} />
                           </div>
@@ -172,9 +196,9 @@ const Orders = () => {
                     </CTableDataCell>
                     <CTableDataCell>
                       {item.products.map((p, pi) => (
-                        <div v-for="item in orders" key={pi}>
+                        <div v-for="item in records" key={pi}>
                           <div>
-                            Product name : {p.productname}
+                            Product name : <a className="a-text-underline" href="#">{p.productname}</a>
                           </div>
                           <div>ASIN: {p.asin}</div>
                           <div>SKU: {p.sku}</div>
@@ -192,7 +216,7 @@ const Orders = () => {
                     </CTableDataCell>
 
                     <CTableDataCell className="text-center">
-                      <div>{item.orderstatus}</div>
+                      <div><label className={"btn btn-sm btn-" + (item.orderstatus === 'Confirmed' ? 'primary' : 'danger')} >{item.orderstatus}</label></div>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
                       <div>
@@ -229,11 +253,13 @@ const Orders = () => {
 
             </CTable>
             <CPagination align="center" aria-label="Page navigation example">
-              <CPaginationItem disabled>Previous</CPaginationItem>
-              <CPaginationItem active>1</CPaginationItem>
-              <CPaginationItem>2</CPaginationItem>
-              <CPaginationItem>3</CPaginationItem>
-              <CPaginationItem>Next</CPaginationItem>
+              <CPaginationItem disabled={currentPage === 1} onClick={() => prevPage()}>Previous</CPaginationItem>
+              {
+                numbers.map((n, i) => (
+                  <CPaginationItem key={i} active={currentPage === n} onClick={() => changePage(n)}>{n}</CPaginationItem>
+                ))
+              }
+              <CPaginationItem disabled={currentPage === nPage} onClick={() => nextPage()}>Next</CPaginationItem>
             </CPagination>
           </CRow>
         </CCardBody>
