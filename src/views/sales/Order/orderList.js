@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import CIcon from '@coreui/icons-react'
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,6 +17,12 @@ import {
   CImage,
   CPagination,
   CPaginationItem,
+  CDropdown,
+  CDropdownToggle,
+  CDropdownMenu,
+  CDropdownItem,
+  CFormSelect,
+  CFormLabel,
 } from '@coreui/react'
 import {
   cilPencil, cilPlus
@@ -45,6 +53,7 @@ const Orders = () => {
   const getAllOrders = async () => {
     accountapi.getAllOrders().then(result => {
       setOrders(result.data);
+      console.log("Orders", orders)
     });
   }
 
@@ -125,7 +134,7 @@ const Orders = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1); // No of pages
-  const recordsPerPage = 5;
+  const [recordsPerPage, setRecordsPerPage] = useState(5);
   const lastIndex = currentPage * recordsPerPage;
   const firstIndex = lastIndex - recordsPerPage;
   const records = orders.slice(firstIndex, lastIndex);
@@ -149,6 +158,19 @@ const Orders = () => {
     }
   }
 
+  // Dropdown filter
+  const [fromDate, setFromDate] = useState(new Date());
+  const [toDate, setToDate] = useState(new Date());
+  const [orderDate, setOrderDate] = useState('Descending');
+  const handleClickDDl = (e, key) => {
+    if (key === 'orderDate') {
+      if (e.target.value === 'Ascending') {
+        records.sort(a => a.orderdate)
+      }
+    } 
+    if (key === 'recordPerPage') setRecordsPerPage(e.target.value);
+  }
+
   return (
     <div className="notranslate">
       <CCard className="mb-4">
@@ -158,6 +180,34 @@ const Orders = () => {
               <CButton onClick={handleClick} shape="rounded-0" size="sm" color="info" variant="outline">
                 Add New      <CIcon className="text-info" icon={cilPlus} />
               </CButton>
+            </div>
+            <div className="col-sm-6 justify-content-md-end">
+              <div className="row">
+                <div className="col-sm-5">
+                  <CFormSelect size="sm" id="orderDate" value={orderDate} onChange={(e) => { handleClickDDl(e, 'orderDate'); }}>
+                    <option value='Ascending'>Order date (ascending)</option>
+                    <option value='Descending'>Order date (descending)</option>
+                  </CFormSelect>
+                </div>
+                <div className="col-sm-5">
+                  <CFormSelect size="sm" id="recordPerPage" value={recordsPerPage} onChange={(e) => { handleClickDDl(e, 'recordPerPage'); }}>
+                    <option value={5} > results per page 5</option>
+                    <option value={10} >results per page 10</option>
+                    <option value={15} >results per page 15</option>
+                    <option value={20} >results per page 20</option>
+                  </CFormSelect>
+                </div>
+              </div>
+              <div className="row" style={{ marginTop: '10px' }}>
+                <div className="col-sm-5">
+                  <CFormLabel htmlFor="fromDate">From</CFormLabel>
+                  <DatePicker id="fromDate" selected={fromDate} onChange={(date) => setFromDate(date)} />
+                </div>
+                <div className="col-sm-5">
+                  <CFormLabel htmlFor="toDate">To</CFormLabel>
+                  <DatePicker id="toDate" selected={toDate} onChange={(date) => setToDate(date)} />
+                </div>
+              </div>
             </div>
           </CRow>
           <CRow>

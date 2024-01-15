@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\views",
+    "\\src\\views\\master",
+    "\\src\\views\\master\\Brand",
+    "\\src\\views\\sales",
+    "\\src\\views\\sales\\Order"
+  ],
+  "SelectedNode": "\\src\\views\\sales\\Order\\orderPdf.css",
+  "PreviewInSolutionExplorer": false
+}
