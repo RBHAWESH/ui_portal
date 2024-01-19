@@ -10,10 +10,15 @@ import {
   CCard,
   CCardBody,
   CRow,
+  CFormCheck,
+  CAccordionItem,
+  CAccordionHeader,
+  CAccordionBody,
+  CAccordion,
 } from '@coreui/react'
 
 import {
-  cilCheckCircle, cilXCircle
+  cilCheckCircle, cilXCircle, cilSearch
 } from '@coreui/icons'
 
 const ShipmentList = () => {
@@ -56,11 +61,22 @@ const ShipmentList = () => {
   return (
     <>
       <CCard className="mb-4">
+        <CAccordion activeItemKey={2}>
+          <CAccordionItem itemKey={1}>
+            <CAccordionHeader><CIcon className="text-info" icon={cilSearch} /> &nbsp; <strong>Search</strong>  </CAccordionHeader>
+            <CAccordionBody>
+              It is hidden by default, until the
+            </CAccordionBody>
+          </CAccordionItem>
+        </CAccordion>
+      </CCard>
+      <CCard className="mb-4">
         <CCardBody>
           <CRow>
             <CTable align="middle" className="mb-0 border mt-1" hover responsive>
               <CTableHead color="light">
                 <CTableRow>
+                  <CTableHeaderCell>  <CFormCheck /></CTableHeaderCell>
                   <CTableHeaderCell>Shipment #</CTableHeaderCell>
                   <CTableHeaderCell>Order #</CTableHeaderCell>
                   <CTableHeaderCell>Pickup from store</CTableHeaderCell>
@@ -76,6 +92,9 @@ const ShipmentList = () => {
                 {shipments.map((item, index) => (
                   <CTableRow v-for="item in shipments" key={index}>
                     <CTableDataCell>
+                      <div><CFormCheck /></div>
+                    </CTableDataCell>
+                    <CTableDataCell>
                       <div>{item.shipmentNo}</div>
                     </CTableDataCell>
                     <CTableDataCell>
@@ -83,13 +102,13 @@ const ShipmentList = () => {
                     </CTableDataCell>
                     <CTableDataCell>
                       <div>{item.pickupFromStore ? <CIcon className="text-info" icon={cilCheckCircle} /> :
-                        <CIcon className="text-info" icon={cilXCircle} />} </div>
+                        <CIcon className="text-danger" icon={cilXCircle} />} </div>
                     </CTableDataCell>
                     <CTableDataCell>
                       <div>{item.trackingNumber}</div>
                     </CTableDataCell>
                     <CTableDataCell>
-                      <div>{item.totalWeight}</div>
+                      <div>{item.totalWeight} [lb(s)]</div>
                     </CTableDataCell>
                     <CTableDataCell>
                       <div>{new Date(item.dateShipped).toLocaleString()}</div>
