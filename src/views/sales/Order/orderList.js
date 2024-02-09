@@ -17,10 +17,6 @@ import {
   CImage,
   CPagination,
   CPaginationItem,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem,
   CFormSelect,
   CFormLabel,
 } from '@coreui/react'
@@ -50,15 +46,36 @@ const Orders = () => {
   //  getInvoiceData();
   //}, [])
 
+
+  const convertedData = (data) => {
+    data?.forEach((element, index) => {
+      data[index].orderdate = new Date(element.orderdate) //stringToDate(element.orderdate);
+    });
+    return data;
+  }
+
   const getAllOrders = async () => {
     accountapi.getAllOrders().then(result => {
-      setOrders(result.data);
-      console.log("Orders", orders)
+      setOrders(convertedData(result.data));
+      console.log("Orders", result.data)
     });
+  }
+
+  const sortByDate = (sortBy) => {
+    debugger;
+    if (sortBy === 'Ascending') {
+      const sortedData = [...orders].sort((a, b) => a.orderdate - b.orderdate);
+      setOrders(sortedData);
+    }
+    else {
+      const sortedData = [...orders].sort((a, b) => b.orderdate - a.orderdate);
+      setOrders(sortedData);
+    }
   }
 
   const getInvoiceData = async () => {
     accountapi.getInvoiceDetails().then(result => {
+ 
       setInvoice(result.data[0])
       console.log("invoice", invoice)
     });
@@ -137,10 +154,9 @@ const Orders = () => {
   const [recordsPerPage, setRecordsPerPage] = useState(5);
   const lastIndex = currentPage * recordsPerPage;
   const firstIndex = lastIndex - recordsPerPage;
-  const records = orders.slice(firstIndex, lastIndex);
-  const nPage = Math.ceil(orders.length / recordsPerPage);
-  const numbers = [...Array(nPage + 1).keys()].slice(1);
-
+  const records = orders?.slice(firstIndex, lastIndex);
+  const nPage = orders ? Math.ceil(orders.length / recordsPerPage) : 0;
+  const numbers = [...Array(nPage + 1).keys()]?.slice(1);
 
   const prevPage = () => {
     if (currentPage !== 1) {
@@ -161,15 +177,62 @@ const Orders = () => {
   // Dropdown filter
   const [fromDate, setFromDate] = useState(new Date());
   const [toDate, setToDate] = useState(new Date());
-  const [orderDate, setOrderDate] = useState('Descending');
+  const [orderDate, setOrderDateBy] = useState('Descending');
   const handleClickDDl = (e, key) => {
     if (key === 'orderDate') {
       if (e.target.value === 'Ascending') {
-        records.sort(a => a.orderdate)
+        sortByDate('Ascending');
+        setOrderDateBy(e.target.value)
+      }
+      else {
+        sortByDate('Descending');
+        setOrderDateBy(e.target.value)
       }
     } 
     if (key === 'recordPerPage') setRecordsPerPage(e.target.value);
   }
+
+  const handleCustomdateFilter = async () => {
+
+    const dateRangeObject = { "start_date": fromDate, "end_date": toDate }
+    accountapi.getOrdersByDateRange(dateRangeObject).then(result => {
+      if (!result) result = [];
+      setOrders(convertedData(result.data));
+      console.log("Orders", result.data)
+    });
+  }
+
+  const handleRefreshClick = async () => {
+    setFromDate(new Date())
+    setToDate(new Date())
+    setRecordsPerPage(5);
+    await getAllOrders();
+    sortByDate('Descending');
+    setOrderDateBy('Descending')
+  }
+
+  // Excel Export
+  const handleExcelExport = async () => {
+
+    alert('Exported to excel')
+    // Use below line of code to download excel
+
+
+    ////try {
+    ////  // Make API request to get Excel blob
+    ////  const response = await axios.get('YOUR_API_ENDPOINT', {
+    ////    responseType: 'blob',
+    ////  });
+
+    ////  // Convert blob to downloadable file
+    ////  const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+    ////  // Trigger download
+    ////  saveAs(blob, 'downloaded_file.xlsx');
+    ////} catch (error) {
+    ////  console.error('Error downloading Excel file:', error);
+    ////}
+  };
 
   return (
     <div className="notranslate">
@@ -179,6 +242,9 @@ const Orders = () => {
             <div className="col-sm-6 justify-content-md-end">
               <CButton onClick={handleClick} shape="rounded-0" size="sm" color="info" variant="outline">
                 Add New      <CIcon className="text-info" icon={cilPlus} />
+              </CButton> &nbsp;
+              <CButton onClick={handleExcelExport} shape="rounded-0" size="sm" color="info" variant="outline">
+                Export To Excel      <CIcon className="text-info" icon={cilPlus} />
               </CButton>
             </div>
             <div className="col-sm-6 justify-content-md-end">
@@ -197,6 +263,11 @@ const Orders = () => {
                     <option value={20} >results per page 20</option>
                   </CFormSelect>
                 </div>
+                <div className="col-sm-2">
+                  <CButton onClick={handleRefreshClick} shape="rounded-0" size="sm" color="info" variant="outline">
+                    Refresh
+                  </CButton>
+                </div>
               </div>
               <div className="row" style={{ marginTop: '10px' }}>
                 <div className="col-sm-5">
@@ -206,6 +277,12 @@ const Orders = () => {
                 <div className="col-sm-5">
                   <CFormLabel htmlFor="toDate">To</CFormLabel>
                   <DatePicker id="toDate" selected={toDate} onChange={(date) => setToDate(date)} />
+                </div>
+                <div className="col-sm-2">
+                  <CFormLabel htmlFor="toDate">&nbsp;</CFormLabel>
+                  <CButton onClick={handleCustomdateFilter} shape="rounded-0" size="sm" color="info" variant="outline">
+                    Date Range
+                  </CButton>
                 </div>
               </div>
             </div>
@@ -224,18 +301,18 @@ const Orders = () => {
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {records.map((item, index) => (
+                {records?.map((item, index) => (
                   <CTableRow v-for="item in records" key={index}>
                     <CTableDataCell>
                       <div><strong>{item.time}</strong></div>
-                      <div>{item.orderdate}</div>
+                      <div>{item.orderdate ? item.orderdate.toLocaleString() : ''}</div>
                     </CTableDataCell>
                     <CTableDataCell>
                       <div><a className="a-text-underline" href="#">{item.orderid}</a></div>
                       <div>Buyer name: {item.buyername}</div>
                     </CTableDataCell>
                     <CTableDataCell>
-                      {item.products.map((p, pi) => (
+                      {item.products?.map((p, pi) => (
                         <div v-for="item in records" key={pi}>
                           <div>
                             <CImage src={p.image} width={90} height={90} />
@@ -245,7 +322,7 @@ const Orders = () => {
 
                     </CTableDataCell>
                     <CTableDataCell>
-                      {item.products.map((p, pi) => (
+                      {item.products?.map((p, pi) => (
                         <div v-for="item in records" key={pi}>
                           <div>
                             Product name : <a className="a-text-underline" href="#">{p.productname}</a>
@@ -305,7 +382,7 @@ const Orders = () => {
             <CPagination align="center" aria-label="Page navigation example">
               <CPaginationItem disabled={currentPage === 1} onClick={() => prevPage()}>Previous</CPaginationItem>
               {
-                numbers.map((n, i) => (
+                numbers?.map((n, i) => (
                   <CPaginationItem key={i} active={currentPage === n} onClick={() => changePage(n)}>{n}</CPaginationItem>
                 ))
               }
@@ -392,7 +469,7 @@ const Orders = () => {
                       <td>Tax Amount</td>
                       <td>Image</td>
                     </tr>
-                    {invoiceTest.products.map((item, index) => (
+                    {invoiceTest.products?.map((item, index) => (
                       <tr className='item'>
                         <td> {index}</td>
                         <td>{item.qty}</td>

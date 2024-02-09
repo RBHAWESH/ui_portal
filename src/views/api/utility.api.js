@@ -1,14 +1,33 @@
-let baseUrl = "http://localhost:8080/api/";
+let baseUrl = "http://110.227.220.168/WallHerbApi/api/";
 const utilutyapi = {  
   getItems: async (endPoint) => {
     try {
       const rawResponse = await fetch(baseUrl + endPoint, {
-        method: "GET",
+        method: "POST",
         headers: {
           Accept: "application/json",
-          "Content-Type": "application/json;UTF-8",
+          "Content-Type": "application/json",
           //   Authorization: Utilities.getAuthoriztion(),
         },
+        body: JSON.stringify({"start_date" : '', "end_date": ''}),
+      });
+
+      return await (rawResponse.status === 200 ? rawResponse.json() : null);
+    } catch (error) {
+      alert("Error " + error);
+      return null;
+    }
+  },
+  getItemsByDateRange: async (endPoint, dateRangeObject) => {
+    try {
+      const rawResponse = await fetch(baseUrl + endPoint, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          //   Authorization: Utilities.getAuthoriztion(),
+        },
+        body: JSON.stringify(dateRangeObject),
       });
 
       return await (rawResponse.status === 200 ? rawResponse.json() : null);
